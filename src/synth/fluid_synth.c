@@ -635,7 +635,8 @@ new_fluid_synth(fluid_settings_t *settings)
     double sample_rate_min, sample_rate_max;
 
     /* initialize all the conversion tables and other stuff */
-    if(fluid_atomic_int_compare_and_exchange(&fluid_synth_initialized, 0, 1))
+    int val = 0;
+    if(fluid_atomic_int_compare_and_exchange(&fluid_synth_initialized, &val, 1))
     {
         fluid_synth_init();
     }

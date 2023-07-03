@@ -81,7 +81,7 @@ option ( BUILD_SHARED_LIBS "Build a shared object or DLL" on )
 option ( enable-dbus "compile DBUS support (if it is available)" on )
 option ( enable-ipv6  "enable IPv6 support at the cost of disabling IPv4" on )
 option ( enable-jack "compile JACK support (if it is available)" on )
-option ( enable-ladspa "enable LADSPA effect units" on )
+option ( enable-ladspa "enable LADSPA effect units" off )
 option ( enable-libinstpatch "use libinstpatch (if available) to load DLS and GIG files" on )
 option ( enable-libsndfile "compile libsndfile support (if it is available)" on )
 option ( enable-midishare "compile MidiShare support (if it is available)" on )
@@ -125,7 +125,7 @@ endif ( CMAKE_SYSTEM MATCHES "OS2" )
 set(CMAKE_C_STANDARD 90)
 
 # the default C++ standard to use for all targets
-set(CMAKE_CXX_STANDARD 98)
+set(CMAKE_CXX_STANDARD 11)
 
 # whether to use gnu extensions
 set(CMAKE_C_EXTENSIONS ON)
@@ -180,12 +180,13 @@ check_include_file ( pthread.h HAVE_PTHREAD_H )
 check_include_file ( signal.h HAVE_SIGNAL_H )
 check_include_file ( getopt.h HAVE_GETOPT_H )
 check_include_file ( stdint.h HAVE_STDINT_H )
+check_include_file ( stdatomic.h HAVE_STDATOMIC_H )
 check_type_size ( "long long" LONG_LONG )
 if ( NOT HAVE_LONG_LONG AND NOT MSVC)
     message ( FATAL_ERROR "Your compiler does not support intrinsic type 'long long'. Unable to compile fluidsynth." )
 endif ()
 
-include ( CMakePrintHelpers ) # for cmake_print_properties() and cmake_print_variables() 
+include ( CMakePrintHelpers ) # for cmake_print_properties() and cmake_print_variables()
 include ( TestInline )
 include ( TestVLA )
 include ( TestBigEndian )
@@ -506,7 +507,6 @@ endif(ASTYLE)
 # Set the minimum version desired for libraries
 set ( ALSA_MINIMUM_VERSION 0.9.1 )
 set ( DBUS_MINIMUM_VERSION 1.11.12 )
-set ( GLIB2_MINUMUM_VERSION 2.6.5 )
 set ( LASH_MINIMUM_VERSION 0.3 )
 set ( LIBINSTPATCH_MINIMUM_VERSION 1.1.0 )
 set ( LIBSNDFILE_MINIMUM_VERSION 1.0.0 )
@@ -520,14 +520,6 @@ include ( PkgConfigHelpers ) # Needed for Find modules using pkg-config
 if ( CMAKE_VERSION VERSION_GREATER_EQUAL 3.15 AND VCPKG_TOOLCHAIN )
   set ( CMAKE_FIND_PACKAGE_PREFER_CONFIG ON )
 endif ()
-
-# Mandatory libraries: glib and gthread
-find_package ( GLib2 ${GLIB2_MINUMUM_VERSION} REQUIRED )
-list( APPEND PC_REQUIRES_PRIV "glib-2.0" "gthread-2.0")
-
-if ( GLib2_VERSION AND GLib2_VERSION VERSION_LESS "2.26.0" )
-    message ( WARNING "Your version of glib is very old. This may cause problems with fluidsynth's sample cache on Windows. Consider updating to glib 2.26 or newer!" )
-endif ( GLib2_VERSION AND GLib2_VERSION VERSION_LESS "2.26.0" )
 
 # Optional features
 unset ( LIBSNDFILE_SUPPORT CACHE )

@@ -896,7 +896,7 @@ int main(int argc, char **argv)
     if(config_file == NULL)
     {
         config_file = fluid_get_userconf(buf, sizeof(buf));
-        if(config_file == NULL || !g_file_test(config_file, G_FILE_TEST_EXISTS))
+        if(config_file == NULL)
         {
             config_file = fluid_get_sysconf(buf, sizeof(buf));
         }

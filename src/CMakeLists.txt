@@ -121,6 +121,10 @@ set ( libfluidsynth_SOURCES
     utils/fluidsynth_priv.h
     utils/fluid_sys.c
     utils/fluid_sys.h
+    utils/fluid_threading.cpp
+    utils/fluid_threading.h
+    utils/fluid_atomics.c
+    utils/fluid_atomics.h
     sfloader/fluid_defsfont.c
     sfloader/fluid_defsfont.h
     sfloader/fluid_sfont.h
@@ -362,8 +366,6 @@ if ( TARGET OpenMP::OpenMP_C AND HAVE_OPENMP )
     target_link_libraries ( libfluidsynth-OBJ PUBLIC OpenMP::OpenMP_C )
 endif()
 
-target_link_libraries ( libfluidsynth-OBJ PUBLIC GLib2::glib-2 GLib2::gthread-2 )
-
 if ( TARGET SndFile::sndfile AND LIBSNDFILE_SUPPORT )
     target_link_libraries ( libfluidsynth-OBJ PUBLIC SndFile::sndfile )
 endif()
@@ -396,10 +398,6 @@ endif()
 
 if ( TARGET dbus-1 AND DBUS_SUPPORT )
     target_link_libraries ( libfluidsynth-OBJ PUBLIC dbus-1 )
-endif()
-
-if ( TARGET GLib2::gmodule-2 AND LADSPA_SUPPORT )
-    target_link_libraries ( libfluidsynth-OBJ PUBLIC GLib2::gmodule-2 )
 endif()
 
 if ( TARGET InstPatch::libinstpatch AND LIBINSTPATCH_SUPPORT )
@@ -484,10 +482,6 @@ endif()
 
 if ( TARGET Systemd::libsystemd AND SYSTEMD_SUPPORT )
     target_link_libraries ( fluidsynth PRIVATE Systemd::libsystemd )
-endif()
-
-if ( TARGET GLib2::glib-2 ) # because g_file_test()
-    target_link_libraries ( fluidsynth PRIVATE GLib2::glib-2 )
 endif()
 
 if ( SDL2_SUPPORT ) # because SDL_Init() etc.

@@ -124,6 +124,9 @@
 /* Define to 1 if you have the <getopt.h> header file. */
 #cmakedefine HAVE_GETOPT_H @HAVE_GETOPT_H@
 
+/* Define to 1 if you have the <stdatomic.h> header file. */
+#cmakedefine HAVE_STDATOMIC_H @HAVE_STDATOMIC_H@
+
 /* Define to 1 if you have the inet_ntop() function. */
 #cmakedefine HAVE_INETNTOP @HAVE_INETNTOP@
 
