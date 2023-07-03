@@ -73,7 +73,7 @@ option ( BUILD_SHARED_LIBS "Build a shared object or DLL" on )
 option ( enable-dbus "compile DBUS support (if it is available)" on )
 option ( enable-ipv6  "enable ipv6 support" on )
 option ( enable-jack "compile JACK support (if it is available)" on )
-option ( enable-ladspa "enable LADSPA effect units" on )
+option ( enable-ladspa "enable LADSPA effect units" off )
 option ( enable-libinstpatch "use libinstpatch (if available) to load DLS and GIG files" on )
 option ( enable-libsndfile "compile libsndfile support (if it is available)" on )
 option ( enable-midishare "compile MidiShare support (if it is available)" on )
@@ -86,7 +86,7 @@ option ( enable-wasapi "compile Windows WASAPI support (if it is available)" on 
 option ( enable-waveout "compile Windows WaveOut support (if it is available)" on )
 option ( enable-winmidi "compile Windows MIDI support (if it is available)" on )
 option ( enable-sdl2 "compile SDL2 audio support (if it is available)" on )
-option ( enable-pkgconfig "use pkg-config to locate fluidsynth's (mostly optional) dependencies" on )
+option ( enable-pkgconfig "use pkg-config to locate fluidsynth's (mostly optional) dependencies" off )
 option ( enable-pulseaudio "compile PulseAudio support (if it is available)" on )
 option ( enable-readline "compile readline lib line editing (if it is available)" on )
 option ( enable-threads "enable multi-threading support (such as parallel voice synthesis)" on )
@@ -131,7 +131,7 @@ mark_as_advanced ( LIB_SUFFIX )
 set(CMAKE_C_STANDARD 90)
 
 # the default C++ standard to use for all targets
-set(CMAKE_CXX_STANDARD 98)
+set(CMAKE_CXX_STANDARD 11)
 
 # whether to use gnu extensions
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -184,6 +184,7 @@ check_include_file ( pthread.h HAVE_PTHREAD_H )
 check_include_file ( signal.h HAVE_SIGNAL_H )
 check_include_file ( getopt.h HAVE_GETOPT_H )
 check_include_file ( stdint.h HAVE_STDINT_H )
+check_include_file ( stdatomic.h HAVE_STDATOMIC_H )
 check_type_size ( "long long" LONG_LONG )
 if ( NOT HAVE_LONG_LONG AND NOT MSVC)
     message ( FATAL_ERROR "Your compiler does not support intrinsic type 'long long'. Unable to compile fluidsynth." )
@@ -492,38 +493,9 @@ if ( ASTYLE )
     )
 endif(ASTYLE)
 
-if(NOT enable-pkgconfig)
-
-    FIND_LIBRARY( GLIB_LIB NAMES glib glib-2.0 PATH GLIB_LIBRARY_DIR )
-    FIND_LIBRARY( GTHREAD_LIB NAMES gthread gthread-2.0 PATH GTHREAD_LIBRARY_DIR )
-    FIND_PATH( GLIBH_DIR glib.h PATH GLIB_INCLUDE_DIR )
-    FIND_PATH( GLIBCONF_DIR glibconfig.h PATH GLIBCONF_INCLUDE_DIR )
-
-    IF( GLIB_LIB MATCHES "GLIB_LIB-NOTFOUND" OR
-            GTHREAD_LIB MATCHES "GTHREAD_LIB-NOTFOUND" OR
-            GLIBH_DIR MATCHES "GLIBH_DIR-NOTFOUND" OR
-            GLIBCONF_DIR MATCHES "GLIBCONF_DIR-NOTFOUND")
-            message( WARNING "Not sure if I found GLIB, continuing anyway.")
-    ENDIF()
-
-    SET( GLIB_INCLUDE_DIRS ${GLIBH_DIR} ${GLIBCONF_DIR} )
-    SET( GLIB_LIBRARIES ${GLIB_LIB} ${GTHREAD_LIB} )
-
-    message( STATUS "GLIB_INCLUDE_DIRS: " ${GLIB_INCLUDE_DIRS} )
-    message( STATUS "GLIB_LIBRARIES: " ${GLIB_LIBRARIES} )
-
-else(NOT enable-pkgconfig)
+if(enable-pkgconfig)
 
     find_package ( PkgConfig REQUIRED )
-
-    # Mandatory libraries: glib and gthread
-    pkg_check_modules ( GLIB REQUIRED glib-2.0>=2.6.5 gthread-2.0>=2.6.5 )
-    list( APPEND PC_REQUIRES_PRIV "glib-2.0" "gthread-2.0")
-
-    if ( GLIB_glib-2.0_VERSION AND GLIB_glib-2.0_VERSION VERSION_LESS "2.26.0" )
-        message ( WARNING "Your version of glib is very old. This may cause problems with fluidsynth's sample cache on Windows. Consider updating to glib 2.26 or newer!" )
-    endif ( GLIB_glib-2.0_VERSION AND GLIB_glib-2.0_VERSION VERSION_LESS "2.26.0" )
-
     include ( UnsetPkgConfig )
 
     # Optional features
@@ -687,7 +659,7 @@ else(NOT enable-pkgconfig)
     endif ( READLINE_FOUND )
     endif ( enable-readline )
 
-endif(NOT enable-pkgconfig)
+endif(enable-pkgconfig)
 
 unset ( AUFILE_SUPPORT CACHE )
 if ( enable-aufile )
@@ -827,7 +799,6 @@ configure_file ( ${CMAKE_SOURCE_DIR}/src/config.cmake
 
 # Setup linker directories NOW, as the command will apply only to targets created after it has been called.
 link_directories (
-    ${GLIB_LIBRARY_DIRS}
     ${LASH_LIBRARY_DIRS}
     ${JACK_LIBRARY_DIRS}
     ${ALSA_LIBRARY_DIRS}

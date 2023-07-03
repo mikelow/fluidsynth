@@ -29,8 +29,6 @@
 #ifndef _FLUIDSYNTH_PRIV_H
 #define _FLUIDSYNTH_PRIV_H
 
-#include <glib.h>
-
 #include "config.h"
 
 #if HAVE_STDLIB_H
@@ -45,6 +43,11 @@
 #include <string.h>
 #endif
 
+#ifdef _MSC_VER
+#include <malloc.h>
+#endif
+
+#include "fluid_threading.h"
 
 #include "fluidsynth.h"
 
@@ -60,12 +63,20 @@ typedef float fluid_real_t;
 typedef double fluid_real_t;
 #endif
 
-#if defined(SUPPORTS_VLA)
+ #if defined(SUPPORTS_VLA)
 #  define FLUID_DECLARE_VLA(_type, _name, _len) \
      _type _name[_len]
+#define FLUID_DECLARE_VLA(_type, _name, _len) _type _name[_len]
+#elif defined _MSC_VER
+#define fluid_alloca(size) _alloca((size))
+#define fluid_newa(struct_type, n_structs) \
+    ((struct_type *)fluid_alloca(sizeof(struct_type) * (size_t)(n_structs)))
+#define FLUID_DECLARE_VLA(_type, _name, _len) _type *_name = fluid_newa(_type, (_len))
 #else
 #  define FLUID_DECLARE_VLA(_type, _name, _len) \
      _type* _name = g_newa(_type, (_len))
+/* Should just call alloca() */
+#define FLUID_DECLARE_VLA(_type, _name, _len) _type *_name = g_newa(_type, (_len))
 #endif
 
 
@@ -74,6 +85,10 @@ typedef int fluid_atomic_int_t;
 typedef unsigned int fluid_atomic_uint_t;
 typedef float fluid_atomic_float_t;
 
+#ifndef TRUE
+#define TRUE 1
+#define FALSE 0
+#endif
 
 /***************************************************************
  *
@@ -233,21 +248,11 @@ do { strncpy(_dst,_src,_n-1); \
 #define FLUID_SPRINTF                sprintf
 #define FLUID_FPRINTF                fprintf
 
-#if (defined(WIN32) && _MSC_VER < 1900) || defined(MINGW32)
-/* need to make sure we use a C99 compliant implementation of (v)snprintf(),
- * i.e. not microsofts non compliant extension _snprintf() as it doesn't
- * reliably null-terminate the buffer
- */
-#define FLUID_SNPRINTF           g_snprintf
-#else
+/* Assume a recent enough version of MSVC is used (VS 2015 upwards)
+* so that the following functions are standard compliant */
 #define FLUID_SNPRINTF           snprintf
-#endif
 
-#if (defined(WIN32) && _MSC_VER < 1500) || defined(MINGW32)
-#define FLUID_VSNPRINTF          g_vsnprintf
-#else
 #define FLUID_VSNPRINTF          vsnprintf
-#endif
 
 #if defined(WIN32) && !defined(MINGW32)
 #define FLUID_STRCASECMP         _stricmp
@@ -285,13 +290,20 @@ do { strncpy(_dst,_src,_n-1); \
 #endif
 
 #if defined(DEBUG) && !defined(NDEBUG)
-#define FLUID_ASSERT(a) g_assert(a)
+#include <assert.h>
+#define FLUID_ASSERT(a) assert(a)
 #else
 #define FLUID_ASSERT(a)
 #endif
 
-#define FLUID_LIKELY G_LIKELY
-#define FLUID_UNLIKELY G_UNLIKELY
+#ifdef __GNUC__
+#define FLUID_LIKELY(a) __builtin_expect((a), 1)
+#define FLUID_UNLIKELY(a) __builtin_expect((a), 0)
+#else
+#define FLUID_LIKELY
+#define FLUID_UNLIKELY
+#endif
+
 
 /* Misc */
 #if defined(__INTEL_COMPILER)

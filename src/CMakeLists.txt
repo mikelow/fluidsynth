@@ -35,7 +35,6 @@ include_directories (
 
 include_directories (
     SYSTEM
-    ${GLIB_INCLUDE_DIRS}
     ${PTHREADS_INCLUDE_DIR}
     ${SDL2_INCLUDE_DIR}
     ${LIBINSTPATCH_INCLUDE_DIRS}
@@ -162,6 +161,10 @@ set ( libfluidsynth_SOURCES
     utils/fluidsynth_priv.h
     utils/fluid_sys.c
     utils/fluid_sys.h
+    utils/fluid_threading.cpp
+    utils/fluid_threading.h
+    utils/fluid_atomics.c
+    utils/fluid_atomics.h
     sfloader/fluid_defsfont.c
     sfloader/fluid_defsfont.h
     sfloader/fluid_sfont.h

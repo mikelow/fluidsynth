@@ -2191,7 +2191,8 @@ fluid_player_callback(void *data, unsigned int msec)
     while(loadnextfile);
 
     /* do not update the status if the player has been stopped already */
-    fluid_atomic_int_compare_and_exchange(&player->status, FLUID_PLAYER_PLAYING, status);
+    int s = FLUID_PLAYER_PLAYING;
+    fluid_atomic_int_compare_and_exchange(&player->status, &s, status);
 
     return 1;
 }
@@ -2283,7 +2284,8 @@ int fluid_player_seek(fluid_player_t *player, int ticks)
 
     if(fluid_player_get_status(player) == FLUID_PLAYER_PLAYING)
     {
-        if(fluid_atomic_int_compare_and_exchange(&player->seek_ticks, -1, ticks))
+        int val = -1;
+        if(fluid_atomic_int_compare_and_exchange(&player->seek_ticks, &val, ticks))
         {
             // new seek position has been set, as no previous seek was in progress
             return FLUID_OK;
