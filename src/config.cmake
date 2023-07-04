@@ -133,6 +133,9 @@
 /* Define to enable JACK driver */
 #cmakedefine JACK_SUPPORT @JACK_SUPPORT@
 
+/* Define to enable PipeWire driver */
+#cmakedefine PIPEWIRE_SUPPORT @PIPEWIRE_SUPPORT@
+
 /* Include the LADSPA Fx unit */
 #cmakedefine LADSPA @LADSPA_SUPPORT@
 
@@ -232,7 +235,7 @@
 #cmakedefine WITH_PROFILING @WITH_PROFILING@
 
 /* Define to use the readline library for line editing */
-#cmakedefine WITH_READLINE @WITH_READLINE@
+#cmakedefine READLINE_SUPPORT @READLINE_SUPPORT@
 
 /* Define if the compiler supports VLA */ 
 #cmakedefine SUPPORTS_VLA @SUPPORTS_VLA@ 

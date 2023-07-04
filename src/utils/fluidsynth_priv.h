@@ -1,30 +1,30 @@
 /* FluidSynth - A Software Synthesizer
- *
- * Copyright (C) 2003  Peter Hanappe and others.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public License
- * as published by the Free Software Foundation; either version 2.1 of
- * the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free
- * Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
- * 02110-1301, USA
- */
+*
+* Copyright (C) 2003  Peter Hanappe and others.
+*
+* This library is free software; you can redistribute it and/or
+* modify it under the terms of the GNU Lesser General Public License
+* as published by the Free Software Foundation; either version 2.1 of
+* the License, or (at your option) any later version.
+*
+* This library is distributed in the hope that it will be useful, but
+* WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+* Lesser General Public License for more details.
+*
+* You should have received a copy of the GNU Lesser General Public
+* License along with this library; if not, write to the Free
+* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+* 02110-1301, USA
+*/
 
 /*
- * @file fluidsynth_priv.h
- * 
- * lightweight part of fluid_sys.h, containing forward declarations of fluidsynth's private types and private macros
- *
- * include this one file in fluidsynth's private header files
- */
+* @file fluidsynth_priv.h
+*
+* lightweight part of fluid_sys.h, containing forward declarations of fluidsynth's private types and private macros
+*
+* include this one file in fluidsynth's private header files
+*/
 
 #ifndef _FLUIDSYNTH_PRIV_H
 #define _FLUIDSYNTH_PRIV_H
@@ -43,6 +43,9 @@
 #include <string.h>
 #endif
 
+#if HAVE_STRINGS_H
+#include <strings.h>
+#endif
 #ifdef _MSC_VER
 #include <malloc.h>
 #endif
@@ -51,11 +54,14 @@
 
 #include "fluidsynth.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /***************************************************************
- *
- *         BASIC TYPES
- */
+*
+*         BASIC TYPES
+*/
 
 #if defined(WITH_FLOAT)
 typedef float fluid_real_t;
@@ -63,18 +69,18 @@ typedef float fluid_real_t;
 typedef double fluid_real_t;
 #endif
 
- #if defined(SUPPORTS_VLA)
+#if defined(SUPPORTS_VLA)
 #  define FLUID_DECLARE_VLA(_type, _name, _len) \
-     _type _name[_len]
+    _type _name[_len]
 #define FLUID_DECLARE_VLA(_type, _name, _len) _type _name[_len]
 #elif defined _MSC_VER
 #define fluid_alloca(size) _alloca((size))
 #define fluid_newa(struct_type, n_structs) \
-    ((struct_type *)fluid_alloca(sizeof(struct_type) * (size_t)(n_structs)))
+   ((struct_type *)fluid_alloca(sizeof(struct_type) * (size_t)(n_structs)))
 #define FLUID_DECLARE_VLA(_type, _name, _len) _type *_name = fluid_newa(_type, (_len))
 #else
 #  define FLUID_DECLARE_VLA(_type, _name, _len) \
-     _type* _name = g_newa(_type, (_len))
+    _type* _name = g_newa(_type, (_len))
 /* Should just call alloca() */
 #define FLUID_DECLARE_VLA(_type, _name, _len) _type *_name = g_newa(_type, (_len))
 #endif
@@ -91,9 +97,9 @@ typedef float fluid_atomic_float_t;
 #endif
 
 /***************************************************************
- *
- *       FORWARD DECLARATIONS
- */
+*
+*       FORWARD DECLARATIONS
+*/
 typedef struct _fluid_env_data_t fluid_env_data_t;
 typedef struct _fluid_adriver_definition_t fluid_adriver_definition_t;
 typedef struct _fluid_channel_t fluid_channel_t;
@@ -106,26 +112,26 @@ typedef struct _fluid_zone_range_t fluid_zone_range_t;
 typedef struct _fluid_rvoice_eventhandler_t fluid_rvoice_eventhandler_t;
 
 /* Declare rvoice related typedefs here instead of fluid_rvoice.h, as it's needed
- * in fluid_lfo.c and fluid_adsr.c as well */
+* in fluid_lfo.c and fluid_adsr.c as well */
 typedef union _fluid_rvoice_param_t
 {
-    void *ptr;
-    int i;
-    fluid_real_t real;
+   void *ptr;
+   int i;
+   fluid_real_t real;
 } fluid_rvoice_param_t;
 enum { MAX_EVENT_PARAMS = 7 }; /**< Maximum number of #fluid_rvoice_param_t to be passed to an #fluid_rvoice_function_t */
 typedef void (*fluid_rvoice_function_t)(void *obj, const fluid_rvoice_param_t param[MAX_EVENT_PARAMS]);
 
 /* Macro for declaring an rvoice event function (#fluid_rvoice_function_t). The functions may only access
- * those params that were previously set in fluid_voice.c
- */
+* those params that were previously set in fluid_voice.c
+*/
 #define DECLARE_FLUID_RVOICE_FUNCTION(name) void name(void* obj, const fluid_rvoice_param_t param[MAX_EVENT_PARAMS])
 
 
 /***************************************************************
- *
- *                      CONSTANTS
- */
+*
+*                      CONSTANTS
+*/
 
 #define FLUID_BUFSIZE                64         /**< FluidSynth internal buffer size (in samples) */
 #define FLUID_MIXER_MAX_BUFFERS_DEFAULT (8192/FLUID_BUFSIZE) /**< Number of buffers that can be processed in one rendering run */
@@ -137,9 +143,9 @@ typedef void (*fluid_rvoice_function_t)(void *obj, const fluid_rvoice_param_t pa
 #define FLUID_NUM_MOD                64         /**< Maximum number of modulators in a voice */
 
 /***************************************************************
- *
- *                      SYSTEM INTERFACE
- */
+*
+*                      SYSTEM INTERFACE
+*/
 
 /* Math constants */
 #ifndef M_PI
@@ -212,7 +218,7 @@ void* fluid_alloc(size_t len);
 
 FILE *fluid_fopen(const char *filename, const char *mode);
 
-#ifdef WIN32
+#ifdef _WIN32
 #define FLUID_FSEEK(_f,_n,_set)      _fseeki64(_f,_n,_set)
 #else
 #define FLUID_FSEEK(_f,_n,_set)      fseek(_f,_n,_set)
@@ -233,7 +239,7 @@ FILE *fluid_fopen(const char *filename, const char *mode);
 
 #define FLUID_STRNCPY(_dst,_src,_n) \
 do { strncpy(_dst,_src,_n-1); \
-    (_dst)[(_n)-1]='\0'; \
+   (_dst)[(_n)-1]='\0'; \
 }while(0)
 
 #define FLUID_STRCHR(_s,_c)          strchr(_s,_c)
@@ -254,13 +260,13 @@ do { strncpy(_dst,_src,_n-1); \
 
 #define FLUID_VSNPRINTF          vsnprintf
 
-#if defined(WIN32) && !defined(MINGW32)
+#if defined(_WIN32) && !defined(MINGW32)
 #define FLUID_STRCASECMP         _stricmp
 #else
 #define FLUID_STRCASECMP         strcasecmp
 #endif
 
-#if defined(WIN32) && !defined(MINGW32)
+#if defined(_WIN32) && !defined(MINGW32)
 #define FLUID_STRNCASECMP         _strnicmp
 #else
 #define FLUID_STRNCASECMP         strncasecmp
@@ -279,10 +285,10 @@ do { strncpy(_dst,_src,_n-1); \
 #endif
 
 /* People who want to reduce the size of the may do this by entirely
- * removing the logging system. This will cause all log messages to
- * be discarded at compile time, allowing to save about 80 KiB for
- * the compiled binary.
- */
+* removing the logging system. This will cause all log messages to
+* be discarded at compile time, allowing to save about 80 KiB for
+* the compiled binary.
+*/
 #if 0
 #define FLUID_LOG                    (void)sizeof
 #else
@@ -323,12 +329,15 @@ do { strncpy(_dst,_src,_n-1); \
 
 #define fluid_return_if_fail(cond) \
 if(cond) \
-    ; \
+   ; \
 else \
-    return
+   return
 
 #define fluid_return_val_if_fail(cond, val) \
- fluid_return_if_fail(cond) (val)
+fluid_return_if_fail(cond) (val)
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _FLUIDSYNTH_PRIV_H */

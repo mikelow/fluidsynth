@@ -1,40 +1,40 @@
 /* FluidSynth - A Software Synthesizer
- *
- * Copyright (C) 2003  Peter Hanappe and others.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public License
- * as published by the Free Software Foundation; either version 2.1 of
- * the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free
- * Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
- * 02110-1301, USA
- */
+*
+* Copyright (C) 2003  Peter Hanappe and others.
+*
+* This library is free software; you can redistribute it and/or
+* modify it under the terms of the GNU Lesser General Public License
+* as published by the Free Software Foundation; either version 2.1 of
+* the License, or (at your option) any later version.
+*
+* This library is distributed in the hope that it will be useful, but
+* WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+* Lesser General Public License for more details.
+*
+* You should have received a copy of the GNU Lesser General Public
+* License along with this library; if not, write to the Free
+* Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+* 02110-1301, USA
+*/
 
 
 /*
- * @file fluid_sys.h
- *
- * This header contains a bunch of (mostly) system and machine
- * dependent functions:
- *
- * - timers
- * - current time in milliseconds and microseconds
- * - debug logging
- * - profiling
- * - memory locking
- * - checking for floating point exceptions
- *
- * fluidsynth's wrapper OSAL so to say; include it in .c files, be careful to include
- * it in fluidsynth's private header files (see comment in fluid_coreaudio.c)
- */
+* @file fluid_sys.h
+*
+* This header contains a bunch of (mostly) system and machine
+* dependent functions:
+*
+* - timers
+* - current time in milliseconds and microseconds
+* - debug logging
+* - profiling
+* - memory locking
+* - checking for floating point exceptions
+*
+* fluidsynth's wrapper OSAL so to say; include it in .c files, be careful to include
+* it in fluidsynth's private header files (see comment in fluid_coreaudio.c)
+*/
 
 #ifndef _FLUID_SYS_H
 #define _FLUID_SYS_H
@@ -128,8 +128,18 @@
 
 #include "fluid_threading.h"
 
+/*
+* CYGWIN has its own version of <windows.h>, which can be
+* safely included together with POSIX includes.
+* Thanks to this, CYGWIN can also run audio output and MIDI
+* input drivers from traditional interfaces of Windows.
+*/
+#if defined(__CYGWIN__) && HAVE_WINDOWS_H
+#include <windows.h>
+#include <wchar.h>
+#endif
 
-#if defined(WIN32) &&  HAVE_WINDOWS_H
+#if defined(_WIN32) && HAVE_WINDOWS_H
 #include <winsock2.h>
 #include <ws2tcpip.h>	/* Provides also socklen_t */
 
@@ -159,14 +169,14 @@
 
 
 /**
- * Macro used for safely accessing a message from a GError and using a default
- * message if it is NULL.
- * @param err Pointer to a GError to access the message field of.
- * @return Message string
- */
+* Macro used for safely accessing a message from a GError and using a default
+* message if it is NULL.
+* @param err Pointer to a GError to access the message field of.
+* @return Message string
+*/
 #define fluid_gerror_message(err)  ((err) ? err->message : "No error details")
 
-#ifdef WIN32
+#if defined(_WIN32) || defined(__CYGWIN__)
 char* fluid_get_windows_error(void);
 #endif
 
@@ -196,17 +206,23 @@ char* fluid_get_windows_error(void);
 
 #if FLUID_IS_BIG_ENDIAN
 #define FLUID_FOURCC(_a, _b, _c, _d) \
-    (uint32_t)(((uint32_t)(_a) << 24) | ((uint32_t)(_b) << 16) | ((uint32_t)(_c) << 8) | (uint32_t)(_d))
+   (uint32_t)(((uint32_t)(_a) << 24) | ((uint32_t)(_b) << 16) | ((uint32_t)(_c) << 8) | (uint32_t)(_d))
 #else
 #define FLUID_FOURCC(_a, _b, _c, _d) \
-    (uint32_t)(((uint32_t)(_d) << 24) | ((uint32_t)(_c) << 16) | ((uint32_t)(_b) << 8) | (uint32_t)(_a)) 
+   (uint32_t)(((uint32_t)(_d) << 24) | ((uint32_t)(_c) << 16) | ((uint32_t)(_b) << 8) | (uint32_t)(_a))
 #endif
 
 /*
- * Utility functions
- */
+* Utility functions
+*/
 char *fluid_strtok(char **str, char *delim);
 
+//#define FLUID_FILE_TEST_EXISTS G_FILE_TEST_EXISTS
+//#define FLUID_FILE_TEST_IS_REGULAR G_FILE_TEST_IS_REGULAR
+//#define fluid_file_test(path, flags) g_file_test(path, flags)
+
+#define fluid_shell_parse_argv(command_line, argcp, argvp) g_shell_parse_argv(command_line, argcp, argvp, NULL)
+#define fluid_strfreev g_strfreev
 
 #if defined(__OS2__)
 #define INCL_DOS
@@ -219,28 +235,28 @@ typedef int socklen_t;
 #endif
 
 /**
-    Time functions
+   Time functions
 
- */
+*/
 
 unsigned int fluid_curtime(void);
 double fluid_utime(void);
 
 
 /**
-    Timers
+   Timers
 
- */
+*/
 
 /* if the callback function returns 1 the timer will continue; if it
-   returns 0 it will stop */
+  returns 0 it will stop */
 typedef int (*fluid_timer_callback_t)(void *data, unsigned int msec);
 
 typedef struct _fluid_timer_t fluid_timer_t;
 
 fluid_timer_t *new_fluid_timer(int msec, fluid_timer_callback_t callback,
-                               void *data, int new_thread, int auto_destroy,
-                               int high_priority);
+                              void *data, int new_thread, int auto_destroy,
+                              int high_priority);
 
 void delete_fluid_timer(fluid_timer_t *timer);
 int fluid_timer_join(fluid_timer_t *timer);
@@ -275,18 +291,18 @@ typedef _mutex    fluid_cond_mutex_t;
 static FLUID_INLINE fluid_cond_mutex_t *
 new_fluid_cond_mutex(void)
 {
-    _mutex *mutex;
-    mutex = FLUID_NEW(_mutex);
-    _mutex_init(mutex);
-    return (mutex);
+   _mutex *mutex;
+   mutex = FLUID_NEW(_mutex);
+   _mutex_init(mutex);
+   return (mutex);
 }
 
 static FLUID_INLINE void
 delete_fluid_cond_mutex(fluid_cond_mutex_t *m)
 {
-    fluid_return_if_fail(m != NULL);
-    _mutex_clear(m);
-    free(m);
+   fluid_return_if_fail(m != NULL);
+   _mutex_clear(m);
+   free(m);
 }
 
 /* Thread condition signaling */
@@ -298,18 +314,18 @@ typedef _cond fluid_cond_t;
 static FLUID_INLINE fluid_cond_t *
 new_fluid_cond(void)
 {
-    _cond *cond;
-    cond = FLUID_NEW(_cond);
-    _cond_init(cond);
-    return (cond);
+   _cond *cond;
+   cond = FLUID_NEW(_cond);
+   _cond_init(cond);
+   return (cond);
 }
 
 static FLUID_INLINE void
 delete_fluid_cond(fluid_cond_t *cond)
 {
-    fluid_return_if_fail(cond != NULL);
-    _cond_clear(cond);
-    free(cond);
+   fluid_return_if_fail(cond != NULL);
+   _cond_clear(cond);
+   free(cond);
 }
 
 /* Thread private data */
@@ -327,34 +343,34 @@ typedef _private fluid_private_t;
 #define fluid_atomic_int_set(_pi, _val)     atomic_store(_pi, _val)
 #define fluid_atomic_int_dec_and_test(_pi)      atomic_fetch_add(_pi, -1)
 #define fluid_atomic_int_compare_and_exchange(_pi, _old, _new) \
-  atomic_compare_exchange_weak(_pi, _old, _new)
+ atomic_compare_exchange_weak(_pi, _old, _new)
 
 #define fluid_atomic_int_exchange_and_add(_pi, _add) \
-  atomic_fetch_add(_pi, _add)
+ atomic_fetch_add(_pi, _add)
 #define fluid_atomic_int_add(_pi, _add) \
-  atomic_fetch_add(_pi, _add)
+ atomic_fetch_add(_pi, _add)
 
 #define fluid_atomic_pointer_get(_pp)           (void *)atomic_load(_pp)
 #define fluid_atomic_pointer_set(_pp, val)      atomic_store(_pp, val)
 #define fluid_atomic_pointer_compare_and_exchange(_pp, _old, _new) \
-  atomic_compare_exchange_weak(_pp, _old, _new)
+ atomic_compare_exchange_weak(_pp, _old, _new)
 
 static FLUID_INLINE void
 fluid_atomic_float_set(fluid_atomic_float_t *fptr, float val)
 {
-    int32_t ival;
-    memcpy(&ival, &val, 4);
-    fluid_atomic_int_set((fluid_atomic_int_t *)fptr, ival);
+   int32_t ival;
+   memcpy(&ival, &val, 4);
+   fluid_atomic_int_set((fluid_atomic_int_t *)fptr, ival);
 }
 
 static FLUID_INLINE float
 fluid_atomic_float_get(fluid_atomic_float_t *fptr)
 {
-    int32_t ival;
-    float fval;
-    ival = fluid_atomic_int_get((fluid_atomic_int_t *)fptr);
-    memcpy(&fval, &ival, 4);
-    return fval;
+   int32_t ival;
+   float fval;
+   ival = fluid_atomic_int_get((fluid_atomic_int_t *)fptr);
+   memcpy(&fval, &ival, 4);
+   return fval;
 }
 
 
@@ -373,7 +389,7 @@ typedef fluid_thread_return_t (*fluid_thread_func_t)(void *data);
 #define fluid_thread_get_id()           _thread_get_id() /* Get unique "ID" for current thread */
 
 fluid_thread_t *new_fluid_thread(const char *name, fluid_thread_func_t func, void *data,
-                                 int prio_level, int detach);
+                                int prio_level, int detach);
 void delete_fluid_thread(fluid_thread_t *thread);
 void fluid_thread_self_set_prio(int prio_level);
 int fluid_thread_join(fluid_thread_t *thread);
@@ -396,15 +412,15 @@ typedef GModule fluid_module_t;
 int fluid_istream_readline(fluid_istream_t in, fluid_ostream_t out, char *prompt, char *buf, int len);
 int fluid_ostream_printf(fluid_ostream_t out, const char *format, ...);
 
-#if defined(WIN32)
+#if defined(_WIN32)
 typedef SOCKET fluid_socket_t;
 #else
 typedef int fluid_socket_t;
 #endif
 
 /* The function should return 0 if no error occurred, non-zero
-   otherwise. If the function return non-zero, the socket will be
-   closed by the server. */
+  otherwise. If the function return non-zero, the socket will be
+  closed by the server. */
 typedef int (*fluid_server_func_t)(void *data, fluid_socket_t client_socket, char *addr);
 
 fluid_server_socket_t *new_fluid_server_socket(int port, fluid_server_func_t func, void *data);
@@ -420,8 +436,8 @@ fluid_ostream_t fluid_socket_get_ostream(fluid_socket_t sock);
 #else
 #define fluid_stat(_filename, _statbuf) stat((_filename), (_statbuf))
 #endif
-#if defined(WIN32) || HAVE_WINDOWS_H
-        typedef struct _stat64i32 fluid_stat_buf_t;
+#if defined(_WIN32) || HAVE_WINDOWS_H
+typedef struct _stat64i32 fluid_stat_buf_t;
 #else
 /* posix, OS/2, etc. */
 typedef struct stat fluid_stat_buf_t;
@@ -434,16 +450,16 @@ fluid_long_long_t fluid_file_tell(FILE* f);
 /* Profiling */
 #if WITH_PROFILING
 /** profiling interface between Profiling command shell and Audio
-    rendering  API (FluidProfile_0004.pdf- 3.2.2)
+   rendering  API (FluidProfile_0004.pdf- 3.2.2)
 */
 
 /*
-  -----------------------------------------------------------------------------
-  Shell task side |    Profiling interface              |  Audio task side
-  -----------------------------------------------------------------------------
-  profiling       |    Internal    |      |             |      Audio
-  command   <---> |<-- profling -->| Data |<--macros -->| <--> rendering
-  shell           |    API         |      |             |      API
+ -----------------------------------------------------------------------------
+ Shell task side |    Profiling interface               |  Audio task side
+ -----------------------------------------------------------------------------
+ profiling       |    Internal     |      |             |      Audio
+ command   <---> |<-- profiling -->| Data |<--macros -->| <--> rendering
+ shell           |    API          |      |             |      API
 
 */
 
@@ -472,7 +488,7 @@ extern fluid_atomic_int_t fluid_profile_lock ; /* lock between multiple shell */
 /**/
 
 /*----------------------------------------------
-  Internal profiling API (in fluid_sys.c)
+ Internal profiling API (in fluid_sys.c)
 -----------------------------------------------*/
 /* Starts a profiling measure used in shell command "prof_start" */
 void fluid_profile_start_stop(unsigned int end_ticks, short clear_data);
@@ -487,10 +503,10 @@ void fluid_profiling_print_data(double sample_rate, fluid_ostream_t out);
 int fluid_profile_is_cancel_req(void);
 
 /* For OS that implement <ENTER> key for profile cancellation:
- 1) Adds #define FLUID_PROFILE_CANCEL
- 2) Adds the necessary code inside fluid_profile_is_cancel() see fluid_sys.c
+1) Adds #define FLUID_PROFILE_CANCEL
+2) Adds the necessary code inside fluid_profile_is_cancel() see fluid_sys.c
 */
-#if defined(WIN32)      /* Profile cancellation is supported for Windows */
+#if defined(_WIN32)      /* Profile cancellation is supported for Windows */
 #define FLUID_PROFILE_CANCEL
 
 #elif defined(__OS2__)  /* OS/2 specific stuff */
@@ -506,30 +522,30 @@ int fluid_profile_is_cancel_req(void);
 void fluid_profiling_print(void);
 
 /*----------------------------------------------
-  Profiling Data (in fluid_sys.c)
+ Profiling Data (in fluid_sys.c)
 -----------------------------------------------*/
 /** Profiling data. Keep track of min/avg/max values to profile a
-    piece of code. */
+   piece of code. */
 typedef struct _fluid_profile_data_t
 {
-    const char *description;        /* name of the piece of code under profiling */
-    double min, max, total;   /* duration (microsecond) */
-    unsigned int count;       /* total count */
-    unsigned int n_voices;    /* voices number */
-    unsigned int n_samples;   /* audio samples number */
+   const char *description;        /* name of the piece of code under profiling */
+   double min, max, total;   /* duration (microsecond) */
+   unsigned int count;       /* total count */
+   unsigned int n_voices;    /* voices number */
+   unsigned int n_samples;   /* audio samples number */
 } fluid_profile_data_t;
 
 enum
 {
-    /* commands/status  (profiling interface) */
-    PROFILE_STOP,    /* command to stop a profiling measure */
-    PROFILE_START,   /* command to start a profile measure */
-    PROFILE_READY,   /* status to signal that a profiling measure has finished
-	                    and ready to be printed */
-    /*- State returned by fluid_profile_get_status() -*/
-    /* between profiling commands and internal profiling API */
-    PROFILE_RUNNING, /* a profiling measure is running */
-    PROFILE_CANCELED,/* a profiling measure has been canceled */
+   /* commands/status  (profiling interface) */
+   PROFILE_STOP,    /* command to stop a profiling measure */
+   PROFILE_START,   /* command to start a profile measure */
+   PROFILE_READY,   /* status to signal that a profiling measure has finished
+                     and ready to be printed */
+   /*- State returned by fluid_profile_get_status() -*/
+   /* between profiling commands and internal profiling API */
+   PROFILE_RUNNING, /* a profiling measure is running */
+   PROFILE_CANCELED,/* a profiling measure has been canceled */
 };
 
 /* Data interface */
@@ -538,79 +554,79 @@ extern unsigned int fluid_profile_end_ticks;      /* ending position (in ticks) 
 extern fluid_profile_data_t fluid_profile_data[]; /* Profiling data */
 
 /*----------------------------------------------
-  Probes macros
+ Probes macros
 -----------------------------------------------*/
 /** Macro to obtain a time reference used for the profiling */
 #define fluid_profile_ref() fluid_utime()
 
 /** Macro to create a variable and assign the current reference time for profiling.
- * So we don't get unused variable warnings when profiling is disabled. */
+* So we don't get unused variable warnings when profiling is disabled. */
 #define fluid_profile_ref_var(name)     double name = fluid_utime()
 
 /**
- * Profile identifier numbers. List all the pieces of code you want to profile
- * here. Be sure to add an entry in the fluid_profile_data table in
- * fluid_sys.c
- */
+* Profile identifier numbers. List all the pieces of code you want to profile
+* here. Be sure to add an entry in the fluid_profile_data table in
+* fluid_sys.c
+*/
 enum
 {
-    FLUID_PROF_WRITE,
-    FLUID_PROF_ONE_BLOCK,
-    FLUID_PROF_ONE_BLOCK_CLEAR,
-    FLUID_PROF_ONE_BLOCK_VOICE,
-    FLUID_PROF_ONE_BLOCK_VOICES,
-    FLUID_PROF_ONE_BLOCK_REVERB,
-    FLUID_PROF_ONE_BLOCK_CHORUS,
-    FLUID_PROF_VOICE_NOTE,
-    FLUID_PROF_VOICE_RELEASE,
-    FLUID_PROFILE_NBR	/* number of profile probes */
+   FLUID_PROF_WRITE,
+   FLUID_PROF_ONE_BLOCK,
+   FLUID_PROF_ONE_BLOCK_CLEAR,
+   FLUID_PROF_ONE_BLOCK_VOICE,
+   FLUID_PROF_ONE_BLOCK_VOICES,
+   FLUID_PROF_ONE_BLOCK_REVERB,
+   FLUID_PROF_ONE_BLOCK_CHORUS,
+   FLUID_PROF_VOICE_NOTE,
+   FLUID_PROF_VOICE_RELEASE,
+   FLUID_PROFILE_NBR	/* number of profile probes */
 };
 /** Those macros are used to calculate the min/avg/max. Needs a profile number, a
-    time reference, the voices and samples number. */
+   time reference, the voices and samples number. */
 
 /* local macro : acquiere data */
 #define fluid_profile_data(_num, _ref, voices, samples)\
 {\
-	double _now = fluid_utime();\
-	double _delta = _now - _ref;\
-	fluid_profile_data[_num].min = _delta < fluid_profile_data[_num].min ?\
-                                   _delta : fluid_profile_data[_num].min; \
-	fluid_profile_data[_num].max = _delta > fluid_profile_data[_num].max ?\
-                                   _delta : fluid_profile_data[_num].max;\
-	fluid_profile_data[_num].total += _delta;\
-	fluid_profile_data[_num].count++;\
-	fluid_profile_data[_num].n_voices += voices;\
-	fluid_profile_data[_num].n_samples += samples;\
-	_ref = _now;\
+   double _now = fluid_utime();\
+   double _delta = _now - _ref;\
+   fluid_profile_data[_num].min = _delta < fluid_profile_data[_num].min ?\
+                                  _delta : fluid_profile_data[_num].min; \
+   fluid_profile_data[_num].max = _delta > fluid_profile_data[_num].max ?\
+                                  _delta : fluid_profile_data[_num].max;\
+   fluid_profile_data[_num].total += _delta;\
+   fluid_profile_data[_num].count++;\
+   fluid_profile_data[_num].n_voices += voices;\
+   fluid_profile_data[_num].n_samples += samples;\
+   _ref = _now;\
 }
 
 /** Macro to collect data, called from inner functions inside audio
-    rendering API */
+   rendering API */
 #define fluid_profile(_num, _ref, voices, samples)\
 {\
-	if ( fluid_profile_status == PROFILE_START)\
-	{	/* acquires data */\
-		fluid_profile_data(_num, _ref, voices, samples)\
-	}\
+   if ( fluid_profile_status == PROFILE_START)\
+   {	/* acquires data */\
+       fluid_profile_data(_num, _ref, voices, samples)\
+   }\
 }
 
 /** Macro to collect data, called from audio rendering API (fluid_write_xxxx()).
- This macro control profiling ending position (in ticks).
+This macro control profiling ending position (in ticks).
 */
 #define fluid_profile_write(_num, _ref, voices, samples)\
 {\
-	if (fluid_profile_status == PROFILE_START)\
-	{\
-		/* acquires data first: must be done before checking that profile is
-           finished to ensure at least one valid data sample.
-		*/\
-		fluid_profile_data(_num, _ref, voices, samples)\
-		if (fluid_synth_get_ticks(synth) >= fluid_profile_end_ticks)\
-		{\
-			/* profiling is finished */\
-			fluid_profile_status = PROFILE_READY;\
-		}\
-	}\
+   if (fluid_profile_status == PROFILE_START)\
+   {\
+       /* acquires data first: must be done before checking that profile is
+          finished to ensure at least one valid data sample.
+       */\
+       fluid_profile_data(_num, _ref, voices, samples)\
+       if (fluid_synth_get_ticks(synth) >= fluid_profile_end_ticks)\
+       {\
+           /* profiling is finished */\
+           fluid_profile_status = PROFILE_READY;\
+       }\
+   }\
 }
 
 #else
@@ -625,11 +641,11 @@ enum
 
 /**
 
-    Memory locking
+   Memory locking
 
-    Memory locking is used to avoid swapping of the large block of
-    sample data.
- */
+   Memory locking is used to avoid swapping of the large block of
+   sample data.
+*/
 
 #if defined(HAVE_SYS_MMAN_H) && !defined(__OS2__)
 #define fluid_mlock(_p,_n)      mlock(_p, _n)
@@ -642,10 +658,10 @@ enum
 
 /**
 
-    Floating point exceptions
+   Floating point exceptions
 
-    fluid_check_fpe() checks for "unnormalized numbers" and other
-    exceptions of the floating point processsor.
+   fluid_check_fpe() checks for "unnormalized numbers" and other
+   exceptions of the floating point processor.
 */
 #ifdef FPE_CHECK
 #define fluid_check_fpe(expl) fluid_check_fpe_i386(expl)
@@ -662,23 +678,23 @@ void fluid_clear_fpe_i386(void);
 void fluid_msleep(unsigned int msecs);
 
 /**
- * Advances the given \c ptr to the next \c alignment byte boundary.
- * Make sure you've allocated an extra of \c alignment bytes to avoid a buffer overflow.
- *
- * @note \c alignment must be a power of two
- * @return Returned pointer is guaranteed to be aligned to \c alignment boundary and in range \f[ ptr <= returned_ptr < ptr + alignment \f].
- */
+* Advances the given \c ptr to the next \c alignment byte boundary.
+* Make sure you've allocated an extra of \c alignment bytes to avoid a buffer overflow.
+*
+* @note \c alignment must be a power of two
+* @return Returned pointer is guaranteed to be aligned to \c alignment boundary and in range \f[ ptr <= returned_ptr < ptr + alignment \f].
+*/
 static FLUID_INLINE void *fluid_align_ptr(const void *ptr, unsigned int alignment)
 {
-    uintptr_t ptr_int = (uintptr_t)ptr;
-    unsigned int offset = ptr_int & (alignment - 1);
-    unsigned int add = (alignment - offset) & (alignment - 1); // advance the pointer to the next alignment boundary
-    ptr_int += add;
+   uintptr_t ptr_int = (uintptr_t)ptr;
+   unsigned int offset = ptr_int & (alignment - 1);
+   unsigned int add = (alignment - offset) & (alignment - 1); // advance the pointer to the next alignment boundary
+   ptr_int += add;
 
-    /* assert alignment is power of two */
-    FLUID_ASSERT(!(alignment == 0) && !(alignment & (alignment - 1)));
+   /* assert alignment is power of two */
+   FLUID_ASSERT(!(alignment == 0) && !(alignment & (alignment - 1)));
 
-    return (void *)ptr_int;
+   return (void *)ptr_int;
 }
 
 #define FLUID_DEFAULT_ALIGNMENT (64U)
