@@ -312,7 +312,7 @@ struct _fluid_player_t
        1, the player is driven by internal tempo (miditempo). This is the default.
        0, the player is driven by external tempo (exttempo)
     */
-    int sync_mode;
+    fluid_atomic_int_t sync_mode;
     /* miditempo: internal tempo coming from MIDI file tempo change events
       (in micro seconds per quarter note)
     */
