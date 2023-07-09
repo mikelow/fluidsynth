@@ -1005,7 +1005,7 @@ fluid_thread_high_prio(void* data)
 fluid_thread_t *
 new_fluid_thread(const char *name, fluid_thread_func_t func, void *data, int prio_level, int detach)
 {
-   _thread *thread;
+   _thread *thread = FLUID_NEW(_thread);
    fluid_thread_info_t *info = NULL;
 
    fluid_return_val_if_fail(func != NULL, NULL);
