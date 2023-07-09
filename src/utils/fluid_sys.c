@@ -185,12 +185,12 @@ fluid_log(int level, const char *fmt, ...)
         if(fun != NULL)
         {
             char errbuf[1024];
-            
+
             va_list args;
             va_start(args, fmt);
             FLUID_VSNPRINTF(errbuf, sizeof(errbuf), fmt, args);
             va_end(args);
-        
+
             (*fun)(level, errbuf, fluid_log_user_data[level]);
         }
     }
@@ -238,7 +238,7 @@ FILE *fluid_fopen(const char *filename, const char *mode)
         errno = EINVAL;
         goto error_recovery;
     }
-    
+
     wpath = FLUID_MALLOC(length * sizeof(wchar_t));
     if (wpath == NULL)
     {
@@ -1005,8 +1005,8 @@ fluid_thread_high_prio(void* data)
 fluid_thread_t *
 new_fluid_thread(const char *name, fluid_thread_func_t func, void *data, int prio_level, int detach)
 {
-    _thread *thread;
-    fluid_thread_info_t *info = NULL;
+   _thread *thread = FLUID_NEW(_thread);
+   fluid_thread_info_t *info = NULL;
 
     fluid_return_val_if_fail(func != NULL, NULL);
 
@@ -1676,9 +1676,9 @@ FILE* fluid_file_open(const char* path, const char** errMsg)
     static const char ErrExist[] = "File does not exist.";
     static const char ErrRegular[] = "File is not regular, refusing to open it.";
     static const char ErrNull[] = "File does not exists or insufficient permissions to open it.";
-    
+
     FILE* handle = NULL;
-    
+
     if(!fluid_file_test(path, FLUID_FILE_TEST_EXISTS))
     {
         if(errMsg != NULL)
@@ -1700,7 +1700,7 @@ FILE* fluid_file_open(const char* path, const char** errMsg)
             *errMsg = ErrNull;
         }
     }
-    
+
     return handle;
 }
 
