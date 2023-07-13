@@ -95,6 +95,7 @@ struct _fluid_channel_t
     unsigned char previous_cc_breath;		  /**< Previous Breath */
     enum fluid_channel_legato_mode legatomode;       /**< legato mode */
     enum fluid_channel_portamento_mode portamentomode;   /**< portamento mode */
+    enum fluid_channel_portamento_time_mode portamentotimemode;   /**< portamento time mode */
     /*- End of Poly/mono variables description */
 
     unsigned char cc[128];                         /**< MIDI controller values from [0;127] */

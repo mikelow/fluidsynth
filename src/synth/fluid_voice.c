@@ -1271,7 +1271,6 @@ int fluid_voice_modulate_all(fluid_voice_t *voice)
  * are send to the dsp.
 */
 void fluid_voice_update_portamento(fluid_voice_t *voice, int fromkey, int tokey)
-
 {
     fluid_channel_t *channel = voice->channel;
 
@@ -1280,13 +1279,21 @@ void fluid_voice_update_portamento(fluid_voice_t *voice, int fromkey, int tokey)
     fluid_real_t PitchEnd = fluid_voice_calculate_pitch(voice, tokey);
     fluid_real_t pitchoffset = PitchBeg - PitchEnd;
 
-    /* Calculates increment countinc */
-    /* Increment is function of PortamentoTime (ms)*/
-    unsigned int countinc = (unsigned int)(((fluid_real_t)voice->output_rate *
-                                            0.001f *
-                                            (fluid_real_t)fluid_channel_portamentotime(channel))  /
-                                           (fluid_real_t)FLUID_BUFSIZE  + 0.5f);
+    fluid_real_t durationInSeconds;
+    switch (channel->portamentotimemode) {
+        case FLUID_CHANNEL_PORTAMENTO_TIME_MODE_CENTS_PER_SEC:
+            durationInSeconds = (fabs(pitchoffset) / ((fluid_real_t)(fluid_channel_portamentotime(channel))));
+            break;
+        case FLUID_CHANNEL_PORTAMENTO_TIME_MODE_MS:
+        default:
+            durationInSeconds = ((fluid_real_t)fluid_channel_portamentotime(channel) * 0.001f);
+            break;
+    }
 
+    /* Calculates increment countinc */
+    unsigned int countinc = (unsigned int)(((fluid_real_t)voice->output_rate *
+                                            durationInSeconds)  /
+                                           (fluid_real_t)FLUID_BUFSIZE  + 0.5f);
     /* Send portamento parameters to the voice dsp */
     UPDATE_RVOICE_GENERIC_IR(fluid_rvoice_set_portamento, voice->rvoice, countinc, pitchoffset);
 }
