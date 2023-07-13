@@ -8081,6 +8081,57 @@ int fluid_synth_set_portamento_mode(fluid_synth_t *synth, int chan,
 }
 
 /**
+ * Sets the portamento time mode of a channel.
+ *
+ * @param synth the synth instance.
+ * @param chan MIDI channel number (0 to MIDI channel count - 1).
+ * @param portamentotimemode The portamento time mode as indicated by #fluid_channel_portamento_time_mode.
+ * @return
+ * - #FLUID_OK on success.
+ * - #FLUID_FAILED
+ *   - \a synth is NULL.
+ *   - \a chan is outside MIDI channel count.
+ *   - \a portamentotimemode is invalid.
+ */
+int fluid_synth_set_portamento_time_mode(fluid_synth_t *synth, int chan,
+                                         int portamentotimemode)
+{
+    /* checks parameters first */
+    fluid_return_val_if_fail(portamentotimemode >= 0, FLUID_FAILED);
+    fluid_return_val_if_fail(portamentotimemode < FLUID_CHANNEL_PORTAMENTO_TIME_MODE_LAST, FLUID_FAILED);
+    FLUID_API_ENTRY_CHAN(FLUID_FAILED);
+    /**/
+    synth->channel[chan]->portamentotimemode = portamentotimemode;
+    /**/
+    FLUID_API_RETURN(FLUID_OK);
+}
+
+/**
+ * Gets the portamento time mode of a channel.
+ *
+ * @param synth the synth instance.
+ * @param chan MIDI channel number (0 to MIDI channel count - 1).
+ * @param portamentotimemode Pointer to the portamento time mode as indicated by #fluid_channel_portamento_time_mode.
+ * @return
+ * - #FLUID_OK on success.
+ * - #FLUID_FAILED
+ *   - \a synth is NULL.
+ *   - \a chan is outside MIDI channel count.
+ *   - \a portamentotimemode is NULL.
+ */
+int fluid_synth_get_portamento_time_mode(fluid_synth_t *synth, int chan,
+                                    int *portamentotimemode)
+{
+    /* checks parameters first */
+    fluid_return_val_if_fail(portamentotimemode != NULL, FLUID_FAILED);
+    FLUID_API_ENTRY_CHAN(FLUID_FAILED);
+    /**/
+    * portamentotimemode = synth->channel[chan]->portamentotimemode;
+    /**/
+    FLUID_API_RETURN(FLUID_OK);
+}
+
+/**
  * Gets the portamento mode of a channel.
  *
  * @param synth the synth instance.
