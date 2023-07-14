@@ -494,6 +494,16 @@ enum fluid_channel_portamento_mode
                                          stability guarantee and may change at any time! */
 };
 
+FLUIDSYNTH_API int fluid_synth_set_portamento_mode(fluid_synth_t *synth,
+        int chan, int portamentomode);
+FLUIDSYNTH_API int fluid_synth_get_portamento_mode(fluid_synth_t *synth,
+        int chan, int   *portamentomode);
+/** @} Portamento Mode */
+
+/** @name Portamento Time Mode
+ * @{
+ */
+
 /**
  * Indicates the portamento time mode a channel is set to
  */
@@ -502,15 +512,16 @@ enum fluid_channel_portamento_time_mode
     FLUID_CHANNEL_PORTAMENTO_TIME_MODE_MS, /**< Mode 0 - milliseconds duration of full slide */
     FLUID_CHANNEL_PORTAMENTO_TIME_MODE_CENTS_PER_SEC, /**< Mode 1 - midicents per second */
     FLUID_CHANNEL_PORTAMENTO_TIME_MODE_LAST /**< @internal Value defines the count of portamento modes
-                                               @warning This symbol is not part of the public API and ABI
-                                               stability guarantee and may change at any time! */
+                                             @warning This symbol is not part of the public API and ABI
+                                             stability guarantee and may change at any time! */
 };
 
-FLUIDSYNTH_API int fluid_synth_set_portamento_mode(fluid_synth_t *synth,
-        int chan, int portamentomode);
-FLUIDSYNTH_API int fluid_synth_get_portamento_mode(fluid_synth_t *synth,
-        int chan, int   *portamentomode);
-/** @} Portamento Mode */
+FLUIDSYNTH_API int fluid_synth_set_portamento_time_mode(fluid_synth_t *synth,
+                                                   int chan, int portamentotimemode);
+FLUIDSYNTH_API int fluid_synth_get_portamento_time_mode(fluid_synth_t *synth,
+                                                   int chan, int   *portamentotimemode);
+/** @} Portamento Time Mode */
+
 
 /**@name Breath Mode
  * @{
