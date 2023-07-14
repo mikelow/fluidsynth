@@ -8066,6 +8066,33 @@ int fluid_synth_set_portamento_mode(fluid_synth_t *synth, int chan,
 }
 
 /**
+ * Gets the portamento mode of a channel.
+ *
+ * @param synth the synth instance.
+ * @param chan MIDI channel number (0 to MIDI channel count - 1).
+ * @param portamentomode Pointer to the portamento mode as indicated by #fluid_channel_portamento_mode.
+ * @return
+ * - #FLUID_OK on success.
+ * - #FLUID_FAILED
+ *   - \a synth is NULL.
+ *   - \a chan is outside MIDI channel count.
+ *   - \a portamentomode is NULL.
+ */
+int fluid_synth_get_portamento_mode(fluid_synth_t *synth, int chan,
+                                    int *portamentomode)
+{
+    /* checks parameters first */
+    fluid_return_val_if_fail(portamentomode != NULL, FLUID_FAILED);
+    FLUID_API_ENTRY_CHAN(FLUID_FAILED);
+    /**/
+    * portamentomode = synth->channel[chan]->portamentomode;
+    /**/
+    FLUID_API_RETURN(FLUID_OK);
+}
+
+/*  API Portamento time mode *********************************************************/
+
+/**
  * Sets the portamento time mode of a channel.
  *
  * @param synth the synth instance.
@@ -8105,38 +8132,13 @@ int fluid_synth_set_portamento_time_mode(fluid_synth_t *synth, int chan,
  *   - \a portamentotimemode is NULL.
  */
 int fluid_synth_get_portamento_time_mode(fluid_synth_t *synth, int chan,
-                                    int *portamentotimemode)
+                                         int *portamentotimemode)
 {
     /* checks parameters first */
     fluid_return_val_if_fail(portamentotimemode != NULL, FLUID_FAILED);
     FLUID_API_ENTRY_CHAN(FLUID_FAILED);
     /**/
     * portamentotimemode = synth->channel[chan]->portamentotimemode;
-    /**/
-    FLUID_API_RETURN(FLUID_OK);
-}
-
-/**
- * Gets the portamento mode of a channel.
- *
- * @param synth the synth instance.
- * @param chan MIDI channel number (0 to MIDI channel count - 1).
- * @param portamentomode Pointer to the portamento mode as indicated by #fluid_channel_portamento_mode.
- * @return
- * - #FLUID_OK on success.
- * - #FLUID_FAILED
- *   - \a synth is NULL.
- *   - \a chan is outside MIDI channel count.
- *   - \a portamentomode is NULL.
- */
-int fluid_synth_get_portamento_mode(fluid_synth_t *synth, int chan,
-                                    int *portamentomode)
-{
-    /* checks parameters first */
-    fluid_return_val_if_fail(portamentomode != NULL, FLUID_FAILED);
-    FLUID_API_ENTRY_CHAN(FLUID_FAILED);
-    /**/
-    * portamentomode = synth->channel[chan]->portamentomode;
     /**/
     FLUID_API_RETURN(FLUID_OK);
 }
