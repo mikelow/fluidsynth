@@ -1281,8 +1281,8 @@ void fluid_voice_update_portamento(fluid_voice_t *voice, int fromkey, int tokey)
 
     fluid_real_t durationInSeconds;
     switch (channel->portamentotimemode) {
-        case FLUID_CHANNEL_PORTAMENTO_TIME_MODE_CENTS_PER_SEC:
-            durationInSeconds = (fabs(pitchoffset) / ((fluid_real_t)(fluid_channel_portamentotime(channel))));
+        case FLUID_CHANNEL_PORTAMENTO_TIME_MODE_DECACENTS_PER_SEC:
+            durationInSeconds = ((fabs(pitchoffset) / ((fluid_real_t)(fluid_channel_portamentotime(channel))))) / 10;
             break;
         case FLUID_CHANNEL_PORTAMENTO_TIME_MODE_MS:
         default:
