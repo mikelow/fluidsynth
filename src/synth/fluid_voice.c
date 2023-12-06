@@ -1281,9 +1281,17 @@ void fluid_voice_update_portamento(fluid_voice_t *voice, int fromkey, int tokey)
 
     fluid_real_t durationInSeconds;
     switch (channel->portamentotimemode) {
-        case FLUID_CHANNEL_PORTAMENTO_TIME_MODE_DECACENTS_PER_SEC:
-            durationInSeconds = ((fabs(pitchoffset) / ((fluid_real_t)(fluid_channel_portamentotime(channel))))) / 10;
+        case FLUID_CHANNEL_PORTAMENTO_TIME_MODE_DECACENTS_PER_SEC: {
+            fluid_real_t decacentsPerSecond = 0x3FFF - fluid_channel_portamentotime(channel);
+            // prevent divide by zero
+            if (decacentsPerSecond == 0) {
+                // use maximum possible duration for FLUID_CHANNEL_PORTAMENTO_TIME_MODE_MS mode
+                durationInSeconds = 0x3FFF * 0.001f;
+            } else {
+                durationInSeconds = fabs(pitchoffset) / (decacentsPerSecond * 10);
+            }
             break;
+        }
         case FLUID_CHANNEL_PORTAMENTO_TIME_MODE_MS:
         default:
             durationInSeconds = ((fluid_real_t)fluid_channel_portamentotime(channel) * 0.001f);
