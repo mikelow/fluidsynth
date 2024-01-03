@@ -354,6 +354,10 @@ if ( WIN32 )
   endif  ( MINGW )
 endif ( WIN32 )
 
+if( UNIX AND NOT APPLE )
+    set ( LIBFLUID_CPPFLAGS "-fPIC" )
+endif()
+
 # Check for threads and math
 find_package ( Threads REQUIRED )
 
