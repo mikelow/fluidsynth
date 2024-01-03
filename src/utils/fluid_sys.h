@@ -119,6 +119,15 @@
 
 #endif
 
+/* __STDC_NO_ATOMICS__ would be the standard way to check for this but MSVC doesn't have it */
+#if !HAVE_STDATOMIC_H
+#include "fluid_atomics.h"
+#else
+#include <stdatomic.h>
+#endif
+
+#include "fluid_threading.h"
+
 /*
  * CYGWIN has its own version of <windows.h>, which can be
  * safely included together with POSIX includes.

@@ -413,7 +413,7 @@ fluid_utime(void)
 {
     double utime;
 
-#ifdef WIN32
+#ifdef _WIN32
     /* use high precision performance counter. */
     static LARGE_INTEGER freq_cache = {0, 0};	/* Performance Frequency */
     LARGE_INTEGER perf_cpt;
@@ -1679,14 +1679,15 @@ FILE* fluid_file_open(const char* path, const char** errMsg)
 
     FILE* handle = NULL;
 
-    if(!fluid_file_test(path, FLUID_FILE_TEST_EXISTS))
+    //    if(!fluid_file_test(path, FLUID_FILE_TEST_EXISTS))
+    fluid_stat_buf_t statbuf;
+    int ret = fluid_stat(path, &statbuf);
+    if (ret != 0)
     {
-        if(errMsg != NULL)
-        {
-            *errMsg = ErrExist;
-        }
+        *errMsg = ErrExist;
     }
-    else if(!fluid_file_test(path, FLUID_FILE_TEST_IS_REGULAR))
+    //    else if(!fluid_file_test(path, FLUID_FILE_TEST_IS_REGULAR))
+    else if ((statbuf.st_mode & S_IFMT) != S_IFREG)
     {
         if(errMsg != NULL)
         {

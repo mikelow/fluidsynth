@@ -433,24 +433,7 @@ static const fluid_cmd_t fluid_commands[] =
 int
 fluid_command(fluid_cmd_handler_t *handler, const char *cmd, fluid_ostream_t out)
 {
-    int result, num_tokens = 0;
-    char **tokens = NULL;
-
-    if(cmd[0] == '#' || cmd[0] == '\0')
-    {
-        return 1;
-    }
-
-    if(!fluid_shell_parse_argv(cmd, &num_tokens, &tokens))
-    {
-        fluid_ostream_printf(out, "Error parsing command\n");
-        return FLUID_FAILED;
-    }
-
-    result = fluid_cmd_handler_handle(handler, num_tokens, &tokens[0], out);
-    fluid_strfreev(tokens);
-
-    return result;
+    return -1;
 }
 
 /**
