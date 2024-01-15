@@ -130,6 +130,7 @@ struct _fluid_channel_t
      * applied to future notes. They are copied to a voice's generators
      * in fluid_voice_init(), which calls fluid_gen_init().  */
     fluid_real_t gen[GEN_LAST];
+    char gen_override[GEN_LAST];
 };
 
 fluid_channel_t *new_fluid_channel(fluid_synth_t *synth, int num);

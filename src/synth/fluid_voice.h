@@ -133,6 +133,9 @@ int fluid_voice_modulate_all(fluid_voice_t *voice);
 /** Set the NRPN value of a generator. */
 int fluid_voice_set_param(fluid_voice_t *voice, int gen, fluid_real_t value);
 
+/** Set the NRPN value of a generator and set the gen flag to override the nominal value **/
+int fluid_voice_set_override_param(fluid_voice_t *voice, int gen, fluid_real_t value);
+
 
 /** Set the gain. */
 int fluid_voice_set_gain(fluid_voice_t *voice, fluid_real_t gain);

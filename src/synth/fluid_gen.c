@@ -106,7 +106,7 @@ fluid_gen_init(fluid_gen_t *gen, fluid_channel_t *channel)
 
     for(i = 0; i < GEN_LAST; i++)
     {
-        gen[i].flags = GEN_UNUSED;
+        gen[i].flags = (channel && channel->gen_override[i]) ? GEN_OVERRIDE : GEN_UNUSED;
         gen[i].mod = 0.0;
         gen[i].nrpn = (channel == NULL) ? 0.0 : fluid_channel_get_gen(channel, i);
         gen[i].val = fluid_gen_info[i].def;

@@ -124,6 +124,8 @@ static int fluid_synth_set_tuning_LOCAL(fluid_synth_t *synth, int chan,
                                         fluid_tuning_t *tuning, int apply);
 static void fluid_synth_set_gen_LOCAL(fluid_synth_t *synth, int chan,
                                       int param, float value);
+static void fluid_synth_set_gen_override_LOCAL(fluid_synth_t *synth, int chan,
+                                      int param, float value);
 static void fluid_synth_stop_LOCAL(fluid_synth_t *synth, unsigned int id);
 
 
@@ -1829,7 +1831,7 @@ fluid_synth_cc_LOCAL(fluid_synth_t *synth, int channum, int num)
                 if(nrpn_select < GEN_LAST)
                 {
                     float val = fluid_gen_scale_nrpn(nrpn_select, data);
-                    fluid_synth_set_gen_LOCAL(synth, channum, nrpn_select, val);
+                    fluid_synth_set_gen_override_LOCAL(synth, channum, nrpn_select, val);
                 }
 
                 chan->nrpn_select = 0;  /* Reset to 0 */
@@ -7562,6 +7564,16 @@ int fluid_synth_set_gen(fluid_synth_t *synth, int chan, int param, float value)
     FLUID_API_RETURN(FLUID_OK);
 }
 
+int fluid_synth_set_gen_override(fluid_synth_t *synth, int chan, int param, float value)
+{
+    fluid_return_val_if_fail(param >= 0 && param < GEN_LAST, FLUID_FAILED);
+    FLUID_API_ENTRY_CHAN(FLUID_FAILED);
+
+    fluid_synth_set_gen_override_LOCAL(synth, chan, param, value);
+
+    FLUID_API_RETURN(FLUID_OK);
+}
+
 /* Synthesis thread local set gen function */
 static void
 fluid_synth_set_gen_LOCAL(fluid_synth_t *synth, int chan, int param, float value)
@@ -7581,6 +7593,28 @@ fluid_synth_set_gen_LOCAL(fluid_synth_t *synth, int chan, int param, float value
         }
     }
 }
+
+/* Synthesis thread local set gen function */
+static void
+fluid_synth_set_gen_override_LOCAL(fluid_synth_t *synth, int chan, int param, float value)
+{
+    fluid_voice_t *voice;
+    int i;
+
+    fluid_channel_set_gen(synth->channel[chan], param, value);
+    synth->channel[chan]->gen_override[param] = 1;
+
+    for(i = 0; i < synth->polyphony; i++)
+    {
+        voice = synth->voice[i];
+
+        if(fluid_voice_get_channel(voice) == chan)
+        {
+            fluid_voice_set_override_param(voice, param, value);
+        }
+    }
+}
+
 
 /**
  * Retrieve the generator NRPN offset assigned to a MIDI channel.

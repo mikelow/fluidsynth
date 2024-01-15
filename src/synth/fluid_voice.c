@@ -398,7 +398,10 @@ void
 fluid_voice_gen_set(fluid_voice_t *voice, int i, float val)
 {
     voice->gen[i].val = val;
-    voice->gen[i].flags = GEN_SET;
+    if (voice->gen[i].flags == GEN_UNUSED)
+    {
+        voice->gen[i].flags = GEN_SET;
+    }
 
     if(i == GEN_SAMPLEMODE)
     {
@@ -417,7 +420,10 @@ void
 fluid_voice_gen_incr(fluid_voice_t *voice, int i, float val)
 {
     voice->gen[i].val += val;
-    voice->gen[i].flags = GEN_SET;
+    if (voice->gen[i].flags == GEN_UNUSED)
+    {
+        voice->gen[i].flags = GEN_SET;
+    }
 }
 
 /**
@@ -435,6 +441,9 @@ fluid_voice_gen_get(fluid_voice_t *voice, int gen)
 
 fluid_real_t fluid_voice_gen_value(const fluid_voice_t *voice, int num)
 {
+    if (voice->gen[num].flags == GEN_OVERRIDE) {
+        return (fluid_real_t)(voice->gen[num].mod + voice->gen[num].nrpn);
+    }
     return (fluid_real_t)(voice->gen[num].val + voice->gen[num].mod + voice->gen[num].nrpn);
 }
 
@@ -1856,6 +1865,14 @@ int fluid_voice_set_param(fluid_voice_t *voice, int gen, fluid_real_t nrpn_value
 {
     voice->gen[gen].nrpn = nrpn_value;
     voice->gen[gen].flags = GEN_SET;
+    fluid_voice_update_param(voice, gen);
+    return FLUID_OK;
+}
+
+int fluid_voice_set_override_param(fluid_voice_t *voice, int gen, fluid_real_t nrpn_value)
+{
+    voice->gen[gen].nrpn = nrpn_value;
+    voice->gen[gen].flags = GEN_OVERRIDE;
     fluid_voice_update_param(voice, gen);
     return FLUID_OK;
 }

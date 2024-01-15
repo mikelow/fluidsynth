@@ -129,6 +129,7 @@ fluid_channel_init_ctrl(fluid_channel_t *chan, int is_all_ctrl_off)
     for(i = 0; i < GEN_LAST; i++)
     {
         chan->gen[i] = 0.0f;
+        chan->gen_override[i] = 0;
     }
 
     if(is_all_ctrl_off)
