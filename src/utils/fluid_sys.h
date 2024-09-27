@@ -436,12 +436,8 @@ fluid_ostream_t fluid_socket_get_ostream(fluid_socket_t sock);
 #else
 #define fluid_stat(_filename, _statbuf) stat((_filename), (_statbuf))
 #endif
-#if defined(_WIN32) || HAVE_WINDOWS_H
-        typedef struct _stat64i32 fluid_stat_buf_t;
-#else
 /* posix, OS/2, etc. */
 typedef struct stat fluid_stat_buf_t;
-#endif
 
 FILE* fluid_file_open(const char* filename, const char** errMsg);
 fluid_long_long_t fluid_file_tell(FILE* f);

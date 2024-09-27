@@ -88,7 +88,7 @@ typedef double fluid_real_t;
 
 
 /** Atomic types  */
-#if defined (_WIN32)
+#if defined (_WIN32) && !defined (__clang__)
     typedef int fluid_atomic_int_t;
     typedef unsigned int fluid_atomic_uint_t;
     typedef float fluid_atomic_float_t;
